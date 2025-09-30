@@ -1,10 +1,12 @@
 
-/* Using DIY pressure sensor to switch on and off LEDs, sensing presure make LEDs gradualy getting on.lifting presure make LEDs gradualy getting off.
+
+
+/* Using DIY pressure sensor to switch on and off LEDs. Sensing presure make LEDs gradualy getting on. Lifting pressure makes LEDs gradually get off.
+
+The threshold is set to control the brightness of LEDs and to map the different values of the pressure sensor to the LEDs.
 Using code reference from OCAD U Digital Futures Creation & Computation 
 Fall 2025 taught by Kate Hartman & Nick Puckett.*/
 
-The value of the sensor is mapped to the brightness of the LED.
-*/
 
 // initialize variables
 int sensorValue = 0;
