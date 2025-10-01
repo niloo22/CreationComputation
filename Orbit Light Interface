@@ -11,18 +11,14 @@ Fall 2025 taught by Kate Hartman & Nick Puckett.*/
 // initialize variables
 int sensorValue = 0;
 int sensorPin = A0;
-int LEDpin = 2;
-int LEDpin2 = 3;
 int LEDpin3 = 10;
 int mappedSensorValue = 0;
 
-int threshold = 30                                                                            f;
+int threshold = 30                                                                            
 
 void setup() {
   // initialize serial communication: 
   Serial.begin(9600);
-  pinMode(LEDpin,OUTPUT);
-  pinMode(LEDpin2,OUTPUT);
   pinMode(LEDpin3,OUTPUT);
 
 }
@@ -43,8 +39,6 @@ void loop() {
   }
 
   // set analog output accordingly 
-  analogWrite(LEDpin, mappedSensorValue);
-  analogWrite(LEDpin2, mappedSensorValue);
   analogWrite(LEDpin3, mappedSensorValue);
 
   // print the sensor and mapped sensor values:
