@@ -1,71 +1,49 @@
-#include <Arduino.h>
+/*********************************************************************
+ * DF Pong Controller – pressure sensore Version
+ *********************************************************************/
 
-// Light sensor variables
-int lightPin;                          
-const int lightAverageWindow = 10;
+#include <ArduinoBLE.h>
+#include "ble_functions.h"
+#include "Pressure_raw.h"   // ← replaces buzzer_functions.h
 
-int lightReadings[lightAverageWindow];
-int lightReadIndex = 0;
-long lightTotal = 0;
+// ============================================
+const int DEVICE_NUMBER = 19;
+// ============================================
 
-int rawLight = 0;
-int smoothedLight = 0;
-int baselineLight = 0;
+String deviceNameStr = "DFPONG-" + String(DEVICE_NUMBER);
+const char* deviceName = deviceNameStr.c_str();
 
-unsigned long lastRead = 0;
-int readInterval = 50;
+const int LED_PIN = LED_BUILTIN;
+const int PRESSURE_PIN = A7;
 
-// ----------------------------------------------------------
-// Setup
-// ----------------------------------------------------------
-void setupLight(int pin) {
-  lightPin = pin;
-  pinMode(lightPin, INPUT);
+int currentMovement = 0;
 
-  // reset rolling average
-  for (int i = 0; i < lightAverageWindow; i++) {
-    lightReadings[i] = 0;
-  }
-  lightTotal = 0;
-  lightReadIndex = 0;
+void setup() 
+{
+  Serial.begin(9600);
+  delay(1000);
 
-  // baseline calibration
-  long total = 0;
-  for (int i = 0; i < lightAverageWindow; i++) {
-    total += analogRead(lightPin);
-    delay(30);
-  }
-  baselineLight = total / lightAverageWindow;
+  Serial.println("=== DF Pong Controller (Light Version) ===");
+
+  pinMode(LED_PIN, OUTPUT);
+
+  setupBLE(deviceName, DEVICE_NUMBER, LED_PIN);
+
+  // Light sensor setup (instead of buzzer)
+  setupLight(PRESSURE_PIN);
 }
 
-// ----------------------------------------------------------
-// Update + smoothing
-// ----------------------------------------------------------
-void updateLight() {
-  unsigned long now = millis();
-  if (now - lastRead < readInterval) return;
+void loop() 
+{
+  updateBLE();
 
-  lastRead = now;
+  handleInput();
 
-  rawLight = analogRead(lightPin);
-
-  // rolling average
-  lightTotal -= lightReadings[lightReadIndex];
-  lightReadings[lightReadIndex] = rawLight;
-  lightTotal += rawLight;
-  lightReadIndex = (lightReadIndex + 1) % lightAverageWindow;
-
-  smoothedLight = lightTotal / lightAverageWindow;
+  sendMovement(currentMovement);
 }
 
-// ----------------------------------------------------------
-// Convert brightness → movement (0/1/2)
-// ----------------------------------------------------------
-int getLightMovement() {
-  int threshold = 100;
-
-  if (abs(smoothedLight - baselineLight) <= threshold) return 0;  // same
-  if (smoothedLight > baselineLight) return 1;                    // brighter → UP
-  return 2;                                                       // darker → DOWN
+void handleInput() 
+{
+  updateLight();                   // read + smooth light
+  currentMovement = getLightMovement();   // 0/1/2
 }
-
